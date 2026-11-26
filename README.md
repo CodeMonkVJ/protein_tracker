@@ -14,36 +14,19 @@ Open [Protein Club](http://127.0.0.1:8000). Choose **Enter username** to open an
 
 ## Run with Docker
 
-### VPS reverse proxy and app server on the same tailnet
-
 Run these commands in the repository on the app server:
 
 ```sh
 mkdir -p -m 700 "$PWD/data"
 docker build -t protein-club .
-TAILSCALE_IP="$(tailscale ip -4)"
 docker run -d --name protein-club --restart unless-stopped \
   --user "$(id -u):$(id -g)" \
-  --publish "${TAILSCALE_IP:?Tailscale IPv4 address required}:47391:8000" \
-  --env PROTEIN_COOKIE_SECURE=1 \
+  --publish 0.0.0.0:47391:8000 \
   --mount "type=bind,source=$PWD/data,target=/data" \
   protein-club
 ```
 
-On the VPS, set the proxy upstream to `http://<app-server-tailscale-ip>:47391`. You can use the app server's MagicDNS name if the proxy can resolve it. Open the app at the proxy's HTTPS URL. Docker forwards port 47391 on the app server's Tailscale address to port 8000 inside the container. [Connecting to a tailnet service](https://tailscale.com/docs/how-to/connect-to-devices)
-
-If your tailnet policy restricts traffic between the two machines, allow the VPS to reach TCP port 47391 on the app server.
-
-### HTTPS reverse proxy on the same machine as the app
-
-- For a proxy running on the host, replace the `--publish` line with `--publish 127.0.0.1:47391:8000` and use `http://127.0.0.1:47391` as the upstream.
-- For a proxy running in Docker, replace the `--publish` line with `--network proxy-net`, using the name of the user-defined network your proxy is attached to. Use `http://protein-club:8000` as the upstream.
-
-In both cases, omit the `TAILSCALE_IP` assignment and keep `PROTEIN_COOKIE_SECURE=1`.
-
-### Local HTTP and data storage
-
-For local HTTP testing, publish `127.0.0.1:47391:8000` and omit the `TAILSCALE_IP` assignment and `--env PROTEIN_COOKIE_SECURE=1` line. Open [Protein Club](http://127.0.0.1:47391).
+Open `http://<server-ip>:47391`. Docker maps port 47391 on all IPv4 interfaces to port 8000 inside the container.
 
 The container stores its SQLite files and generated admin key in `/data`, which maps to the host directory you mounted. Replace `$PWD/data` with any existing absolute host path owned by the user running the container. Use one server per data directory. Stop the native server before mounting its existing data, or use a separate directory and host port.
 
@@ -59,7 +42,7 @@ Sign in as `admin` through **Admin sign-in** in the username dialog. On first la
 | `PROTEIN_DATA_DIR` | `data/` locally, `/data` in Docker | Stores the account registry, admin key, and per-account SQLite files. |
 | `HOST` | `127.0.0.1` locally, `0.0.0.0` in Docker | Controls the bind address. |
 | `PORT` | `8000` | Controls the HTTP port. |
-| `PROTEIN_COOKIE_SECURE` | `0` | Set to `1` when serving behind an HTTPS reverse proxy. |
+| `PROTEIN_COOKIE_SECURE` | `0` | Set to `1` to enable secure session cookies for HTTPS. |
 
 Regular accounts use username-only access. Anyone who knows a member's username can open that account, so use this with a trusted group. Back up the data directory to preserve plans. Use HTTPS if serving the app beyond localhost.
 
