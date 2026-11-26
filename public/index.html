@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f7fc">
+  <meta name="description" content="Plan your protein one week at a time.">
+  <title>Protein Club — Weekly protein planner</title>
+  <link rel="manifest" href="/app.webmanifest">
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+  <script src="/pwa.js" defer></script>
+</head>
+<body>
+  <svg class="svg-symbols" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-brand" viewBox="0 0 24 24"><path d="M13 2 4.5 13h6L10 22l9.5-12h-6L13 2Z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 15h2m4 0h2"/></symbol>
+    <symbol id="i-library" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 2.8 6.5M3 12V6m0 6h6m3-4v4l2.8 2"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-admin" viewBox="0 0 24 24"><path d="m12 22 1-.5c4.5-2.3 7-4.4 7-9V5l-8-3-8 3v7.5c0 4.6 2.5 6.7 7 9Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M3 7h18m-4-4 4 4-4 4M21 17H3m4-4-4 4 4 4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.7 14a8.8 8.8 0 0 1-10.8-10.7A8.8 8.8 0 1 0 20.7 14Z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M4 16v4h16v-4"/></symbol>
+    <symbol id="i-bowl" viewBox="0 0 24 24"><path d="M3 11h18c0 5-3.7 9-9 9s-9-4-9-9ZM9 20h6M10 8l-2-5m6 5 2-5"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main sidebar">
+      <button class="wordmark" type="button" data-action="planner" aria-label="Protein Club home">
+        <span class="brand-icon"><svg aria-hidden="true"><use href="#i-brand"/></svg></span>
+        <span>Protein<span class="brand-accent">Club</span></span>
+      </button>
+
+      <nav class="navigation" aria-label="Main">
+        <button class="nav-item" type="button" data-action="planner" aria-current="page">
+          <svg aria-hidden="true"><use href="#i-calendar"/></svg><span>Weekly planner</span>
+        </button>
+        <button class="nav-item" type="button" data-action="library">
+          <svg aria-hidden="true"><use href="#i-library"/></svg><span>Food library</span>
+        </button>
+        <button class="nav-item" type="button" data-action="templates">
+          <svg aria-hidden="true"><use href="#i-history"/></svg><span>Past weeks</span>
+        </button>
+        <button class="nav-item" type="button" data-action="admin" data-admin-only hidden>
+          <svg aria-hidden="true"><use href="#i-admin"/></svg><span>Manage accounts</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="nav-item" type="button" id="installApp" hidden>
+          <svg aria-hidden="true"><use href="#i-download"/></svg><span>Install app</span>
+        </button>
+        <div class="sidebar-goal">
+          <span class="sidebar-goal-icon"><svg aria-hidden="true"><use href="#i-target"/></svg></span>
+          <div><span>Daily target</span><strong id="sidebarGoal">120 g protein</strong></div>
+          <button class="icon-button" type="button" aria-label="Edit daily target" data-action="goal">
+            <svg aria-hidden="true"><use href="#i-chevron"/></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="mobile-brand" aria-label="Protein Club">
+          <span class="brand-icon"><svg aria-hidden="true"><use href="#i-brand"/></svg></span>
+          <strong>Protein<span class="brand-accent">Club</span></strong>
+        </div>
+        <div class="breadcrumb" id="breadcrumb">Weekly planner</div>
+        <button class="account-button" type="button" data-action="account">
+          <span class="account-avatar" id="accountInitial" aria-hidden="true">G</span>
+          <span class="account-info"><strong id="accountLabel">Guest</strong><small id="accountMode">Preview mode</small></span>
+          <svg class="account-chevron" aria-hidden="true"><use href="#i-down"/></svg>
+        </button>
+      </header>
+
+      <main id="main" class="main">
+        <p id="offlineStatus" class="offline-status" role="status" hidden>Offline. Connect to sign in or save changes.</p>
+        <div class="page-heading">
+          <div>
+            <h1 id="pageTitle">Your protein plan</h1>
+            <p id="pageSubtitle">Plan your servings, one week at a time.</p>
+          </div>
+          <button class="button-primary header-action" type="button" id="headerAction" data-action="signin"><span data-label>Enter username</span> <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
+        </div>
+
+        <section id="viewPlanner" aria-label="Weekly planner">
+          <div id="renewal" hidden></div>
+          <section class="weekly-hero" aria-label="Weekly protein progress">
+            <div class="hero-decoration" aria-hidden="true"><i></i><i></i><i></i></div>
+            <img class="hero-plate" src="/images/hero-plate.webp" alt="" fetchpriority="high" width="960" height="640">
+            <div class="hero-content">
+              <p class="hero-label"><svg aria-hidden="true"><use href="#i-brand"/></svg> Weekly protein</p>
+              <p class="hero-totals"><strong id="heroTotal">428 g</strong><span id="heroGoal">/ 720 g</span></p>
+              <div class="hero-progress" role="progressbar" aria-label="Weekly target progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="59"><span id="heroBar" style="width:59%"></span></div>
+              <p class="hero-meta"><span id="heroMeta">Planned for this week</span><span id="heroPercent">59%</span></p>
+            </div>
+          </section>
+
+          <section class="week-section" aria-labelledby="week-heading">
+            <div class="section-heading">
+              <div><h2 id="week-heading">This week</h2><p id="dateRange"></p></div>
+              <button class="button-secondary compact-button goal-button" type="button" data-action="goal"><svg aria-hidden="true"><use href="#i-target"/></svg> Edit target</button>
+            </div>
+            <div class="week-grid" id="weekDays" aria-label="Days in this planning week"></div>
+          </section>
+
+          <div class="day-layout">
+            <section class="panel day-panel" aria-labelledby="dayTitle">
+              <div class="panel-heading">
+                <div><h2 id="dayTitle">Today's plan</h2><p id="daySubtitle">Your planned servings</p></div>
+                <div class="day-panel-actions">
+                  <span class="day-total" id="dayTotal"></span>
+                  <button class="icon-button rest-button" type="button" aria-label="Toggle cheat day" title="Toggle cheat day" data-action="cheat"><svg aria-hidden="true"><use href="#i-moon"/></svg></button>
+                  <button class="icon-button swap-button" type="button" aria-label="Swap day" title="Swap day" data-action="swap"><svg aria-hidden="true"><use href="#i-swap"/></svg></button>
+                </div>
+              </div>
+              <div id="dayEntries"></div>
+            </section>
+
+            <section class="panel quick-panel" aria-labelledby="quick-heading">
+              <div class="panel-heading">
+                <div><h2 id="quick-heading">Quick add</h2><p>Popular protein sources</p></div>
+                <button class="text-button library-link" type="button" data-action="library">See all <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
+              </div>
+              <div id="quickFoods"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="viewLibrary" aria-label="Food library" hidden>
+          <div id="libraryControls"></div>
+          <div id="libraryFoods"></div>
+        </section>
+
+        <section id="viewAdmin" aria-label="Manage accounts" hidden>
+          <div id="adminContent"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="dialog"></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
