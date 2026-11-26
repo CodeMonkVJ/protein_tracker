@@ -14,30 +14,36 @@ Open [Protein Club](http://127.0.0.1:8000). Choose **Enter username** to open an
 
 ## Run with Docker
 
-### HTTPS reverse proxy on the VPS host
+### VPS reverse proxy and app server on the same tailnet
 
-Build and run from the repository directory:
+Run these commands in the repository on the app server:
 
 ```sh
 mkdir -p -m 700 "$PWD/data"
 docker build -t protein-club .
+TAILSCALE_IP="$(tailscale ip -4)"
 docker run -d --name protein-club --restart unless-stopped \
   --user "$(id -u):$(id -g)" \
-  --publish 127.0.0.1:8000:8000 \
+  --publish "${TAILSCALE_IP:?Tailscale IPv4 address required}:8000:8000" \
   --env PROTEIN_COOKIE_SECURE=1 \
   --mount "type=bind,source=$PWD/data,target=/data" \
   protein-club
 ```
 
-Set the reverse proxy upstream to `http://127.0.0.1:8000` and open the app at your public HTTPS URL. The app listens on `0.0.0.0:8000` inside the container, and Docker publishes port 8000 on the host's loopback interface.
+On the VPS, set the proxy upstream to `http://<app-server-tailscale-ip>:8000`. You can use the app server's MagicDNS name if the proxy can resolve it. Open the app at the proxy's HTTPS URL. The app listens on `0.0.0.0:8000` inside the container, and Docker publishes port 8000 on the app server's Tailscale address. [Connecting to a tailnet service](https://tailscale.com/docs/how-to/connect-to-devices)
 
-### HTTPS reverse proxy in Docker
+If your tailnet policy restricts traffic between the two machines, allow the VPS to reach TCP port 8000 on the app server.
 
-Replace `--publish 127.0.0.1:8000:8000` with `--network proxy-net`, using the name of the user-defined network your proxy is attached to. Set the proxy upstream to `http://protein-club:8000` and keep `PROTEIN_COOKIE_SECURE=1`.
+### HTTPS reverse proxy on the same machine as the app
+
+- For a proxy running on the host, replace the `--publish` line with `--publish 127.0.0.1:8000:8000` and use `http://127.0.0.1:8000` as the upstream.
+- For a proxy running in Docker, replace the `--publish` line with `--network proxy-net`, using the name of the user-defined network your proxy is attached to. Use `http://protein-club:8000` as the upstream.
+
+In both cases, omit the `TAILSCALE_IP` assignment and keep `PROTEIN_COOKIE_SECURE=1`.
 
 ### Local HTTP and data storage
 
-For local HTTP testing, use the host command above without the `--env PROTEIN_COOKIE_SECURE=1` line, then open [Protein Club](http://127.0.0.1:8000).
+For local HTTP testing, publish `127.0.0.1:8000:8000` and omit the `TAILSCALE_IP` assignment and `--env PROTEIN_COOKIE_SECURE=1` line. Open [Protein Club](http://127.0.0.1:8000).
 
 The container stores its SQLite files and generated admin key in `/data`, which maps to the host directory you mounted. Replace `$PWD/data` with any existing absolute host path owned by the user running the container. Use one server per data directory. Stop the native server before mounting its existing data, or use a separate directory and host port.
 
