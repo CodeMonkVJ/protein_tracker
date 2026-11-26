@@ -12,7 +12,23 @@ python3 server.py
 
 Open [Protein Club](http://127.0.0.1:8000). Choose **Enter username** to open an existing account or confirm a new one. Usernames are case-insensitive. The browser remembers the username, and you can re-enter it after clearing browser storage.
 
-### Admin setup
+## Run with Docker
+
+From the repository directory:
+
+```sh
+mkdir -p -m 700 "$PWD/data"
+docker build -t protein-club .
+docker run -d --name protein-club --restart unless-stopped \
+  --user "$(id -u):$(id -g)" \
+  --publish 127.0.0.1:8000:8000 \
+  --mount "type=bind,source=$PWD/data,target=/data" \
+  protein-club
+```
+
+Open [Protein Club](http://127.0.0.1:8000). The container stores its SQLite files and generated admin key in `/data`, which maps to the host directory you mounted. Replace `$PWD/data` with any existing absolute host path owned by the user running the container. Use one server per data directory. Stop the native server before mounting its existing data, or use a separate directory and host port.
+
+## Admin setup
 
 Sign in as `admin` through **Admin sign-in** in the username dialog. On first launch the server writes a generated admin key to `data/admin-key`. Retrieve it locally or set `PROTEIN_ADMIN_KEY` before starting the server. In **Manage accounts**, you can change the account limit and delete member accounts. The default limit is eight members and excludes the admin.
 
@@ -21,8 +37,8 @@ Sign in as `admin` through **Admin sign-in** in the username dialog. On first la
 | `PROTEIN_MAX_ACCOUNTS` | `8` | Sets the starting member limit when initializing a new data directory. |
 | `PROTEIN_ADMIN_USERNAME` | `admin` | Sets the reserved admin username. |
 | `PROTEIN_ADMIN_KEY` | Generated key | Sets the key required for admin login. |
-| `PROTEIN_DATA_DIR` | `data/` | Stores the account registry, admin key, and per-account SQLite files. |
-| `HOST` | `127.0.0.1` | Controls the bind address. |
+| `PROTEIN_DATA_DIR` | `data/` locally, `/data` in Docker | Stores the account registry, admin key, and per-account SQLite files. |
+| `HOST` | `127.0.0.1` locally, `0.0.0.0` in Docker | Controls the bind address. |
 | `PORT` | `8000` | Controls the HTTP port. |
 | `PROTEIN_COOKIE_SECURE` | `0` | Set to `1` when serving behind an HTTPS reverse proxy. |
 
