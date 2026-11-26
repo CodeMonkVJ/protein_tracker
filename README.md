@@ -14,7 +14,9 @@ Open [Protein Club](http://127.0.0.1:8000). Choose **Enter username** to open an
 
 ## Run with Docker
 
-From the repository directory:
+### HTTPS reverse proxy on the VPS host
+
+Build and run from the repository directory:
 
 ```sh
 mkdir -p -m 700 "$PWD/data"
@@ -22,11 +24,22 @@ docker build -t protein-club .
 docker run -d --name protein-club --restart unless-stopped \
   --user "$(id -u):$(id -g)" \
   --publish 127.0.0.1:8000:8000 \
+  --env PROTEIN_COOKIE_SECURE=1 \
   --mount "type=bind,source=$PWD/data,target=/data" \
   protein-club
 ```
 
-Open [Protein Club](http://127.0.0.1:8000). The container stores its SQLite files and generated admin key in `/data`, which maps to the host directory you mounted. Replace `$PWD/data` with any existing absolute host path owned by the user running the container. Use one server per data directory. Stop the native server before mounting its existing data, or use a separate directory and host port.
+Set the reverse proxy upstream to `http://127.0.0.1:8000` and open the app at your public HTTPS URL. The app listens on `0.0.0.0:8000` inside the container, and Docker publishes port 8000 on the host's loopback interface.
+
+### HTTPS reverse proxy in Docker
+
+Replace `--publish 127.0.0.1:8000:8000` with `--network proxy-net`, using the name of the user-defined network your proxy is attached to. Set the proxy upstream to `http://protein-club:8000` and keep `PROTEIN_COOKIE_SECURE=1`.
+
+### Local HTTP and data storage
+
+For local HTTP testing, use the host command above without the `--env PROTEIN_COOKIE_SECURE=1` line, then open [Protein Club](http://127.0.0.1:8000).
+
+The container stores its SQLite files and generated admin key in `/data`, which maps to the host directory you mounted. Replace `$PWD/data` with any existing absolute host path owned by the user running the container. Use one server per data directory. Stop the native server before mounting its existing data, or use a separate directory and host port.
 
 ## Admin setup
 
